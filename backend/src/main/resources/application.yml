@@ -1,0 +1,41 @@
+spring:
+  datasource:
+    url: jdbc:sqlite:./shop.db
+    driver-class-name: org.sqlite.JDBC
+  jpa:
+    database-platform: org.hibernate.community.dialect.SQLiteDialect
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+server:
+  port: 8080
+
+app:
+  jwt:
+    secret: shopSecretKey2024VeryLongSecretForJWTTokenGeneration
+    expiration: 86400000  # 24 hours
+  otp:
+    expiration: 120  # 2 minutes in seconds
+    length: 6
+  upload:
+    dir: ./uploads
+  payment:
+    gateway: zarinpal  # zarinpal | idpay | mellat
+    zarinpal:
+      merchant-id: YOUR_MERCHANT_ID
+      sandbox: true
+    idpay:
+      api-key: YOUR_API_KEY
+      sandbox: true
+
+cors:
+  allowed-origins: http://localhost:3000

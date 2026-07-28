@@ -30,6 +30,7 @@ import AdminSettings from './pages/admin/SettingsPage'
 import AdminMenu from './pages/admin/MenuPage'
 import AdminBanners from './pages/admin/BannersPage'
 
+import AdminLoginPage from './pages/AdminLoginPage'
 import ProtectedRoute from './components/ProtectedRoute'
 import type { PublicSettings } from './types'
 
@@ -74,6 +75,9 @@ export default function App() {
             <Route path="/orders" element={<OrdersPage />} />
           </Route>
         </Route>
+
+        {/* Admin Login — secret path, no auth required */}
+        <Route path="/:adminPath" element={<AdminLoginPage />} />
 
         {/* Admin Routes */}
         <Route element={<ProtectedRoute adminOnly />}>

@@ -5,6 +5,8 @@ import type { Page, Product, Category, Order, SiteSettings, MenuItem, Banner, Us
 export const sendOtp = (phone: string) => api.post('/auth/send-otp', { phone })
 export const verifyOtp = (phone: string, code: string) =>
   api.post<{ token: string }>('/auth/verify-otp', { phone, code })
+export const adminLogin = (path: string, username: string, password: string) =>
+  api.post<{ token: string }>(`/auth/admin/${path}`, { username, password })
 export const getMe = () => api.get<User>('/auth/me')
 export const updateProfile = (data: Partial<User>) => api.put<User>('/auth/profile', data)
 
@@ -92,3 +94,6 @@ export const adminUploadFile = (file: File) => {
   form.append('file', file)
   return api.post<{ url: string }>('/admin/upload', form)
 }
+
+// Admin Info
+export const adminGetInfo = () => api.get<{ adminLoginPath: string }>('/admin/info')

@@ -91,9 +91,14 @@ export interface SiteSettings {
   zarinpalMerchantId?: string
   idpayApiKey?: string
   paymentSandbox: boolean
+  // OTP
+  otpEnabled: boolean
+  otpProvider: 'SMS' | 'TELEGRAM'
   smsProvider?: string
   smsApiKey?: string
   smsSender?: string
+  telegramBotToken?: string
+  telegramChatId?: string
   freeShipping: boolean
   freeShippingThreshold: number
   shippingCost: number

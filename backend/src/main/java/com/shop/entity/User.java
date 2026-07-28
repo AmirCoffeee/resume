@@ -20,6 +20,10 @@ public class User {
     private String email;
     private String address;
 
+    // Admin credentials (only set for ADMIN users)
+    private String username;
+    private String passwordHash;
+
     @Enumerated(EnumType.STRING)
     private Role role = Role.USER;
 

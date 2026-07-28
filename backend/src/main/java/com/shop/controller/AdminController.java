@@ -43,6 +43,16 @@ public class AdminController {
         ));
     }
 
+    // ===== INFO (admin login path — visible only to authenticated admins) =====
+    @GetMapping("/info")
+    public ResponseEntity<?> info() {
+        SiteSettings settings = settingsService.get();
+        return ResponseEntity.ok(Map.of(
+                "adminLoginPath", settings.getAdminLoginPath() != null
+                        ? settings.getAdminLoginPath() : ""
+        ));
+    }
+
     // ===== PRODUCTS =====
     @GetMapping("/products")
     public ResponseEntity<Page<Product>> getProducts(

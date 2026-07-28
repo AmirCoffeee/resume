@@ -9,17 +9,18 @@ const defaultSettings: SiteSettings = {
   siteNameFA: 'فروشگاه من', siteNameEN: 'My Shop',
   primaryColor: '#FF6B35', secondaryColor: '#FFFFFF', accentColor: '#FF8C61',
   paymentGateway: 'zarinpal', paymentSandbox: true,
+  otpEnabled: false, otpProvider: 'SMS',
   freeShipping: false, freeShippingThreshold: 500000, shippingCost: 50000,
 }
 
-type TabKey = 'site' | 'theme' | 'payment' | 'shipping' | 'sms' | 'seo'
+type TabKey = 'site' | 'theme' | 'payment' | 'shipping' | 'otp' | 'seo'
 
 const tabs: { key: TabKey; label: string }[] = [
   { key: 'site', label: 'اطلاعات سایت' },
   { key: 'theme', label: 'تم و رنگ' },
   { key: 'payment', label: 'درگاه پرداخت' },
   { key: 'shipping', label: 'ارسال' },
-  { key: 'sms', label: 'پیامک' },
+  { key: 'otp', label: 'کد تأیید (OTP)' },
   { key: 'seo', label: 'سئو' },
 ]
 
@@ -221,24 +222,107 @@ export default function AdminSettingsPage() {
             </>
           )}
 
-          {activeTab === 'sms' && (
+          {activeTab === 'otp' && (
             <>
-              <div>
-                <label className="block text-sm font-medium mb-1.5">ارائه‌دهنده پیامک</label>
-                <select className="input" value={settings.smsProvider || 'kavenegar'} onChange={(e) => setSettings({ ...settings, smsProvider: e.target.value })}>
-                  <option value="kavenegar">کاوه‌نگار</option>
-                  <option value="ghasedak">قاصدک</option>
-                  <option value="melipayamak">ملی‌پیامک</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1.5">API Key</label>
-                <input className="input font-mono" dir="ltr" value={settings.smsApiKey || ''} onChange={(e) => setSettings({ ...settings, smsApiKey: e.target.value })} />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1.5">شماره فرستنده</label>
-                <input className="input" dir="ltr" value={settings.smsSender || ''} onChange={(e) => setSettings({ ...settings, smsSender: e.target.value })} />
-              </div>
+              {/* Enable toggle */}
+              <label className="flex items-center gap-3 cursor-pointer select-none">
+                <div
+                  onClick={() => setSettings({ ...settings, otpEnabled: !settings.otpEnabled })}
+                  className={`relative w-11 h-6 rounded-full transition-colors ${settings.otpEnabled ? 'bg-primary-500' : 'bg-gray-200'}`}
+                >
+                  <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all ${settings.otpEnabled ? 'right-0.5' : 'left-0.5'}`} />
+                </div>
+                <span className="text-sm font-medium text-gray-700">
+                  ارسال کد تأیید فعال باشد
+                </span>
+              </label>
+
+              {settings.otpEnabled && (
+                <>
+                  {/* Provider toggle */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">روش ارسال OTP</label>
+                    <div className="flex gap-3">
+                      {(['SMS', 'TELEGRAM'] as const).map((p) => (
+                        <button
+                          key={p}
+                          type="button"
+                          onClick={() => setSettings({ ...settings, otpProvider: p })}
+                          className={`flex-1 py-2.5 rounded-xl text-sm font-medium border-2 transition-colors ${
+                            settings.otpProvider === p
+                              ? 'border-primary-500 bg-primary-50 text-primary-600'
+                              : 'border-gray-200 text-gray-500 hover:border-gray-300'
+                          }`}
+                        >
+                          {p === 'SMS' ? '📱 پیامک' : '✈️ تلگرام'}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* SMS fields */}
+                  {settings.otpProvider === 'SMS' && (
+                    <div className="space-y-4 p-4 bg-gray-50 rounded-xl">
+                      <h3 className="text-sm font-semibold text-gray-700">تنظیمات پیامک</h3>
+                      <div>
+                        <label className="block text-sm font-medium mb-1.5">ارائه‌دهنده</label>
+                        <select className="input" value={settings.smsProvider || 'kavenegar'}
+                          onChange={(e) => setSettings({ ...settings, smsProvider: e.target.value })}>
+                          <option value="kavenegar">کاوه‌نگار</option>
+                          <option value="ghasedak">قاصدک</option>
+                          <option value="melipayamak">ملی‌پیامک</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium mb-1.5">API Key</label>
+                        <input className="input font-mono" dir="ltr"
+                          value={settings.smsApiKey || ''}
+                          onChange={(e) => setSettings({ ...settings, smsApiKey: e.target.value })} />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium mb-1.5">شماره فرستنده</label>
+                        <input className="input" dir="ltr"
+                          value={settings.smsSender || ''}
+                          onChange={(e) => setSettings({ ...settings, smsSender: e.target.value })} />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Telegram fields */}
+                  {settings.otpProvider === 'TELEGRAM' && (
+                    <div className="space-y-4 p-4 bg-blue-50 rounded-xl">
+                      <h3 className="text-sm font-semibold text-blue-800">تنظیمات ربات تلگرام</h3>
+                      <p className="text-xs text-blue-600">
+                        یک ربات رایگان از <span dir="ltr">@BotFather</span> بسازید، توکن را اینجا وارد کنید،
+                        سپس Chat ID خود یا گروه را وارد کنید تا OTP‌ها آنجا ارسال شوند.
+                      </p>
+                      <div>
+                        <label className="block text-sm font-medium mb-1.5">Bot Token</label>
+                        <input
+                          className="input font-mono text-sm"
+                          dir="ltr"
+                          placeholder="1234567890:ABCdefGHIjklMNOpqrSTUvwxYZ"
+                          value={settings.telegramBotToken || ''}
+                          onChange={(e) => setSettings({ ...settings, telegramBotToken: e.target.value })}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium mb-1.5">Chat ID</label>
+                        <input
+                          className="input font-mono text-sm"
+                          dir="ltr"
+                          placeholder="-100xxxxxxxxxx  یا  @channelUsername"
+                          value={settings.telegramChatId || ''}
+                          onChange={(e) => setSettings({ ...settings, telegramChatId: e.target.value })}
+                        />
+                        <p className="text-xs text-gray-400 mt-1">
+                          برای پیدا کردن Chat ID می‌توانید از <span dir="ltr">@userinfobot</span> کمک بگیرید.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
             </>
           )}
 

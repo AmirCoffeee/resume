@@ -15,6 +15,8 @@ public class AuthController {
 
     private final AuthService authService;
 
+    // ─── OTP (regular users) ─────────────────────────────────────────────────
+
     @PostMapping("/send-otp")
     public ResponseEntity<?> sendOtp(@RequestBody Map<String, String> body) {
         String phone = body.get("phone");
@@ -34,6 +36,28 @@ public class AuthController {
             return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
         }
     }
+
+    // ─── Admin Login (username + password + secret path) ─────────────────────
+
+    /**
+     * POST /api/auth/admin/{path}
+     * The {path} must match the 20-char random adminLoginPath stored in SiteSettings.
+     * Body: { "username": "...", "password": "..." }
+     */
+    @PostMapping("/admin/{path}")
+    public ResponseEntity<?> adminLogin(
+            @PathVariable String path,
+            @RequestBody Map<String, String> body) {
+        try {
+            String token = authService.adminLogin(path, body.get("username"), body.get("password"));
+            return ResponseEntity.ok(Map.of("token", token));
+        } catch (RuntimeException e) {
+            // Return 401 for any failure — don't leak info about what went wrong
+            return ResponseEntity.status(401).body(Map.of("message", "اطلاعات ورود نادرست است"));
+        }
+    }
+
+    // ─── Profile ─────────────────────────────────────────────────────────────
 
     @GetMapping("/me")
     public ResponseEntity<?> me(Authentication auth) {
